@@ -37,6 +37,54 @@ app.get('/users', (req, res) =>{
     });
 });
 
+app.get('/bestSell', (req, res) =>{
+    db.query("SELECT product_history.productid, product.name, SUM(product_history.quantity) as total_quantity FROM product_history JOIN product ON product_history.productid = product.productid GROUP BY product_history.productid ORDER BY total_quantity DESC", 
+    (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+        }
+    });
+});
+
+app.get('/sellPermonth', (req, res) =>{
+    db.query("SELECT MONTH(upload_date) as MONTH, total, SUM(product_history.totalprice) as total_price FROM cart JOIN product_history ON product_history.cartid = cart.cartid GROUP BY MONTH(upload_date)", 
+    (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+        }
+    });
+});
+
+app.get('/product_cart', (req, res) =>{
+    db.query("SELECT product_history.cartid, product_history.productid, product.name, product_history.quantity FROM product_history JOIN product ON product.productid = product_history.productid ", 
+    (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+        }
+    });
+});
+
+app.get('/user_product', (req, res) => {
+    db.query("SELECT email, product.name as product_name, product_history.quantity FROM user JOIN cart ON cart.userid = user.userid JOIN product_history ON product_history.cartid = cart.cartid JOIN product ON product.productid = product_history.productid",
+    (err, result) => {
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+        }
+    });
+});
+
 app.post('/signup', async (req, res) =>{
     const email = req.body.email;
     const password = req.body.password;
@@ -54,7 +102,7 @@ app.post('/signup', async (req, res) =>{
         }
         else{
             res.send("Success inserted!");
-            res.json({message: "Signup Success!"});
+            return res.json({message: "Signup Success!"});
             //console.log(res)
         }
     })
