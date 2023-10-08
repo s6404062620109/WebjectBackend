@@ -38,19 +38,23 @@ app.get('/users', (req, res) =>{
 });
 
 app.get('/bestSell', (req, res) =>{
-    db.query("SELECT product_history.productid, product.name, SUM(product_history.quantity) as total_quantity FROM product_history JOIN product ON product_history.productid = product.productid GROUP BY product_history.productid ORDER BY total_quantity DESC", 
+    db.query("SELECT product_history.productid, product.name, product.picture, SUM(product_history.quantity) as total_quantity FROM product_history JOIN product ON product_history.productid = product.productid GROUP BY product_history.productid ORDER BY total_quantity DESC", 
     (err, result) =>{
         if(err){
             console.log(err);
         }
         else{
-            res.send(result);
+            const bestSellproduct1 = result[0];
+            const bestSellproduct2 = result[1];
+            const bestSellproduct3 = result[2];
+            //console.log(bestSellproduct3);
+            res.status(201).json({product1: bestSellproduct1,product2: bestSellproduct2,product3: bestSellproduct3})
         }
     });
 });
 
 app.get('/sellPermonth', (req, res) =>{
-    db.query("SELECT MONTH(upload_date) as MONTH, total, SUM(product_history.totalprice) as total_price FROM cart JOIN product_history ON product_history.cartid = cart.cartid GROUP BY MONTH(upload_date)", 
+    db.query("SELECT MONTH(upload_date) as MONTH,  SUM(product_history.quantity) as total, SUM(product.price*product_history.quantity) as total_price FROM cart JOIN product_history ON product_history.cartid = cart.cartid JOIN product ON product.productid = product_history.productid GROUP BY MONTH(upload_date)", 
     (err, result) =>{
         if(err){
             console.log(err);
@@ -99,10 +103,10 @@ app.post('/signup', async (req, res) =>{
     [email, hashedPassword, name, phone_number, address, role], (err, result) =>{
         if(err){
             console.log(err);
+            return res.status(500).json({message: "Signup failed!"});
         }
         else{
-            res.send("Success inserted!");
-            return res.json({message: "Signup Success!"});
+            return res.status(201).json({message: "Signup Success!"});
             //console.log(res)
         }
     })
@@ -177,6 +181,19 @@ app.get('/getUser', (req, res) => {
           res.json({ user });
         }
     );
+});
+
+app.post('/getproduct', (req,res) => {
+    const type = req.body.type;
+    db.query("SELECT * FROM product WHERE category = ?",
+    [type], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+        }
+    });
 });
 
 app.listen('3001', () =>{
