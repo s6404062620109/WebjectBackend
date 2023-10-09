@@ -77,8 +77,11 @@ app.get('/product_cart', (req, res) =>{
     });
 });
 
-app.get('/user_product', (req, res) => {
-    db.query("SELECT email, product.name as product_name, product_history.quantity FROM user JOIN cart ON cart.userid = user.userid JOIN product_history ON product_history.cartid = cart.cartid JOIN product ON product.productid = product_history.productid",
+app.post('/user_product', (req, res) => {
+    const userid = req.body.userid;
+    db.query(
+    "SELECT cart.cartid, product.name, product_history.quantity, product_history.totalprice, cart.payment_status FROM cart JOIN product_history ON product_history.cartid = cart.cartid JOIN product ON product.productid = product_history.productid WHERE userid = ? ORDER BY cart.cartid",
+    [userid],
     (err, result) => {
         if(err){
             console.log(err);
@@ -194,6 +197,37 @@ app.post('/getproduct', (req,res) => {
             res.send(result);
         }
     });
+});
+
+var selectedId = 0;
+app.post('/selectedProduct', (req,res) => {
+    const productid = req.body.productid;
+    db.query("SELECT * FROM product WHERE productid = ?",
+    [productid], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+            // console.log(result[0].productid);
+            selectedId = 0;
+            selectedId = result[0].productid;
+            // console.log(selectedId);
+        }
+    });
+});
+
+app.get('/getproductSelected', (req,res) => {
+    db.query("SELECT * FROM product WHERE productid = ?",
+   [selectedId], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+            // console.log(result);
+        }
+    }); 
 });
 
 app.listen('3001', () =>{
