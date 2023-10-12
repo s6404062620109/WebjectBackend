@@ -330,13 +330,39 @@ app.post('/getcart', (req, res) => {
     });
 });
 
-app.get('/getAllproduct', (req, res) => {
+app.get('/getsimpleproduct', (req, res) => {
     db.query("SELECT * FROM product", (err, result) => {
         if(err){
             console.log(err);
         }
         else{
-            res.send(result);
+            let index = [];
+            while (index.length < 6) {
+                let randomInt = Math.floor(Math.random() * result.length);
+                if (!index.includes(randomInt)) {
+                    index.push(randomInt);
+                }
+            }
+            const simpleproduct1 = result[index[0]];
+            const simpleproduct2 = result[index[1]];
+            const simpleproduct3 = result[index[2]];
+            const simpleproduct4 = result[index[3]];
+            const simpleproduct5 = result[index[4]];
+            const simpleproduct6 = result[index[5]];
+            // console.log(simpleproduct1);
+            // console.log(simpleproduct2);
+            // console.log(simpleproduct3);
+            // console.log(simpleproduct4);
+            // console.log(simpleproduct5);
+            // console.log(simpleproduct6);
+            return res.status(200).json({ 
+                simple1: simpleproduct1,
+                simple2: simpleproduct2,
+                simple3: simpleproduct3, 
+                simple4: simpleproduct4,
+                simple5: simpleproduct5,
+                simple6: simpleproduct6
+            })
         }
     })
 });
