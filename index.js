@@ -355,7 +355,44 @@ app.post('/deleteProduct', (req, res) => {
             res.status(200).json({ message: "Delete Successed!" });
         }
     });
-}); 
+});
+
+app.post('/reccomendproduct', (req, res) => {
+    const category = req.body.type;
+    db.query("SELECT * FROM product WHERE category = ?",
+    [category], (err, result) => {
+        if(err){
+            console.log(err);
+        }
+        else{
+            let index = [];
+            while (index.length < 5) {
+                let randomInt = Math.floor(Math.random() * result.length);
+                if (!index.includes(randomInt)) {
+                    index.push(randomInt);
+                }
+            }
+            const recproduct1 = result[index[0]];
+            const recproduct2 = result[index[1]];
+            const recproduct3 = result[index[2]];
+            const recproduct4 = result[index[3]];
+            const recproduct5 = result[index[4]];
+            return res.status(200).json({ 
+                rec1: recproduct1,
+                rec2: recproduct2,
+                rec3: recproduct3, 
+                rec4: recproduct4,
+                rec5: recproduct5
+            })
+            // console.log(recproduct1);
+            // console.log(recproduct2);
+            // console.log(recproduct3);
+            // console.log(recproduct4);
+            // console.log(recproduct5);
+            // console.log(index);
+        }
+    });
+});
 
 app.listen('3001', () =>{
     console.log('Server is running on port 3001');
