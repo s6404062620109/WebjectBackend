@@ -199,27 +199,11 @@ app.post('/getproduct', (req,res) => {
     });
 });
 
-var selectedId = 0;
-app.post('/selectedProduct', (req,res) => {
-    const productid = req.body.productid;
-    db.query("SELECT * FROM product WHERE productid = ?",
-    [productid], (err, result) =>{
-        if(err){
-            console.log(err);
-        }
-        else{
-            res.send(result);
-            // console.log(result[0].productid);
-            selectedId = 0;
-            selectedId = result[0].productid;
-            // console.log(selectedId);
-        }
-    });
-});
+app.get('/getproductSelected/:pathproduct', (req,res) => {
+    const path = req.params.pathproduct;
 
-app.get('/getproductSelected', (req,res) => {
     db.query("SELECT * FROM product WHERE productid = ?",
-   [selectedId], (err, result) =>{
+   [path], (err, result) =>{
         if(err){
             console.log(err);
         }
@@ -383,10 +367,8 @@ app.post('/deleteProduct', (req, res) => {
     });
 });
 
-app.post('/reccomendproduct', (req, res) => {
-    const category = req.body.type;
-    db.query("SELECT * FROM product WHERE category = ?",
-    [category], (err, result) => {
+app.get('/reccomendproduct', (req, res) => {
+    db.query("SELECT * FROM product",(err, result) => {
         if(err){
             console.log(err);
         }
