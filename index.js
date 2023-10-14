@@ -402,6 +402,21 @@ app.get('/reccomendproduct', (req, res) => {
     });
 });
 
+app.get('/searchproduct/:searchkey', (req,res) => {
+    const path = req.params.searchkey;
+
+    db.query("SELECT * FROM product WHERE name = ?",
+   [path], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+            // console.log(result);
+        }
+    }); 
+});
+
 app.listen('3001', () =>{
     console.log('Server is running on port 3001');
 })
