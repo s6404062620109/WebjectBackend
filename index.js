@@ -292,24 +292,29 @@ app.post('/getcart', (req, res) => {
         if(err){
             console.log(err);
         }
+        else if(result.length === 0){
+            res.send(result);
+            // console.log("Empty");
+            // return res.status(404).json({ message: "Cart is Empty!"});
+        }
         else{
             // console.log(result[0].cartid);
-            // res.send(result);
-            const cartid = result[0].cartid;
-            db.query(
-            "SELECT product_history.id, product_history.productid, product.name, product_history.quantity, totalprice FROM product_history JOIN product ON product.productid = product_history.productid WHERE product_history.cartid = ? ORDER BY product_history.productid",
-            [cartid], (err, result) => {
-                if(err){
-                    console.log(err);
-                }
-                else{
-                    for(let i=0 ; i<result.length ; i++){
-                        result[i].cartid = cartid;
+                const cartid = result[0].cartid;
+                db.query(
+                "SELECT product_history.id, product_history.productid, product.name, product_history.quantity, totalprice FROM product_history JOIN product ON product.productid = product_history.productid WHERE product_history.cartid = ? ORDER BY product_history.productid",
+                [cartid], (err, result) => {
+                    if(err){
+                        console.log(err);
                     }
-                    res.send(result);
-                    // console.log(result);
-                }
-            })            
+                    else{
+                        for(let i=0 ; i<result.length ; i++){
+                            result[i].cartid = cartid;
+                            // console.log(result[i]);
+                        }
+                        res.send(result);
+                        // console.log(result[0].id);
+                    }
+                })           
         }
     });
 });
@@ -405,14 +410,30 @@ app.get('/reccomendproduct', (req, res) => {
 app.get('/searchproduct/:searchkey', (req,res) => {
     const path = req.params.searchkey;
 
-    db.query("SELECT * FROM product WHERE name = ?",
-   [path], (err, result) =>{
+    db.query("SELECT * FROM product WHERE name LIKE '%"+path+"%'",(err, result) =>{
         if(err){
             console.log(err);
         }
         else{
             res.send(result);
             // console.log(result);
+        }
+    }); 
+});
+
+app.get('/ordercheck/:userid/:cartid', (req,res) => {
+    const userid = req.params.userid;
+    const cartid = req.params.cartid;
+
+    db.query(
+    "SELECT cart.cartid, cart.payment_status, cart.qr_picture, product_history.productid, product.name, product.price, product_history.quantity, product_history.totalprice FROM cart JOIN product_history ON product_history.cartid = cart.cartid JOIN product ON product.productid = product_history.productid WHERE cart.cartid = ? AND cart.userid = ?",
+    [cartid, userid],(err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+            //console.log(result);
         }
     }); 
 });
