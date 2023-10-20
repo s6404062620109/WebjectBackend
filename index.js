@@ -93,13 +93,13 @@ app.post('/reqproductincart', (req, res) => {
 
 
 app.post('/signup', async (req, res) =>{
-    const email = req.body.email;
-    const password = req.body.password;
-    const name = req.body.name;
-    const phone_number = req.body.phone_number;
-    const address = req.body.address;
-    const role = req.body.role;
-
+    const email = req.body.data.email;
+    const password = req.body.data.password;
+    const name = req.body.data.name;
+    const phone_number = req.body.data.phone_number;
+    const address = req.body.data.address;
+    const role = req.body.data.role;
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     
     db.query("INSERT INTO user (email, password, name, phone_number, address, role) VALUES(?, ?, ?, ?, ?, ?)", 
