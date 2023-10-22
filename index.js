@@ -214,9 +214,6 @@ app.get('/getproductSelected/:pathproduct', (req,res) => {
     }); 
 });
 
-const min = 1;
-const max = 100;
-const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
 app.post('/postproductid', (req, res) => {
     const productid = req.body.productid;
     const userid = req.body.userid;
@@ -233,7 +230,7 @@ app.post('/postproductid', (req, res) => {
             if(result.length === 0){
                 // console.log(result)
                 db.query("INSERT INTO cart (payment_status, qr_picture, userid) VALUES (?, ?, ?)",
-                    ["not_submit", "/qrimage"+randomInt, userid], (err, result) => {
+                    ["not_submit", "", userid], (err, result) => {
                         if(err){
                             console.log(err);
                             res.status(500).json({message: "Error Inserted cart to database!"});
@@ -437,6 +434,8 @@ app.get('/ordercheck/:userid/:cartid', (req,res) => {
         }
     }); 
 });
+
+
 
 //admin
 
