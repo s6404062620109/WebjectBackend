@@ -438,6 +438,92 @@ app.get('/ordercheck/:userid/:cartid', (req,res) => {
     }); 
 });
 
+//admin
+
+
+app.get('/productlists', (req, res) => {
+    const type = req.body.type;
+    db.query("SELECT * FROM product",
+    [type], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.status(200).json(result);
+        }
+    });
+  });
+  
+app.get('/monthlysale', (req,res) => {
+    const type =req.body.type;
+  
+    const sql=`SELECT
+    YEAR(c.upload_date) AS year,
+    DATE_FORMAT(c.upload_date, ' %Y %M') AS month,
+    SUM(p.totalprice) AS total_price,
+    SUM(p.quantity) AS total_quantity
+  FROM
+    cart c
+  INNER JOIN
+    product_history p ON c.cartid = p.cartid
+  WHERE
+    c.payment_status IN ('yes')
+  GROUP BY
+    YEAR(c.upload_date), MONTH(c.upload_date)
+  ORDER BY
+    YEAR(c.upload_date), MONTH(c.upload_date);`;
+  
+    db.query(sql,[type], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.status(200).json(result);
+        }
+    });
+  });
+  
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) { // Set the destination directory for storing uploads
+      cb(null, 'public/images/');
+    },
+    filename: function (req, file, cb) { // Set the filename for the uploaded file
+      const extname = path.extname(file.originalname);
+      cb(null, file.fieldname + '-' + Date.now() + extname);
+    },
+  });
+  
+  const upload = multer({ storage: storage });
+  const fileUpload = upload.fields([{ name: "image-file", maxCount: 1}]);
+  
+  
+  
+  app.post('/upload',upload.single('file'), (req, res) => {
+  
+    const { name,quantity,price,description,size,color,category} = req.body
+    const uploadedFile = req.file;
+    console.log('-Received Product Data:-');
+    console.log('Name:', name);
+    console.log('Quantity:', quantity);
+    console.log('Price:', price);
+    console.log('Description:', description);
+    console.log('Size:', size);
+    console.log('Color:', color);
+    console.log('Category:', category);
+    console.log('Uploaded File Details:', uploadedFile);
+  
+  
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+  
+    const filePath = req.file.path;
+    const originalFileName = req.file.originalname;
+  
+    // Respond with the file path and original filename
+    res.json({ path: filePath, filename: originalFileName });
+  });
+
 app.listen('3001', () =>{
     console.log('Server is running on port 3001');
 })
