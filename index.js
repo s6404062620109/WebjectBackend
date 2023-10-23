@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 const app = express();
 
 
@@ -16,6 +17,7 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(express.static('public'));
 
 const db = mysql.createConnection({
     user: "root",
@@ -424,7 +426,7 @@ app.get('/ordercheck/:userid/:cartid', (req,res) => {
 
     db.query(
     "SELECT cart.cartid, cart.payment_status, cart.qr_picture, product_history.productid, product.name, product.price, product_history.quantity, product_history.totalprice FROM cart JOIN product_history ON product_history.cartid = cart.cartid JOIN product ON product.productid = product_history.productid WHERE cart.cartid = ? AND cart.userid = ?",
-    [cartid, userid],(err, result) =>{
+    [cartid, userid], (err, result) =>{
         if(err){
             console.log(err);
         }
@@ -435,10 +437,44 @@ app.get('/ordercheck/:userid/:cartid', (req,res) => {
     }); 
 });
 
+app.post('/orderconfirm', (req, res) => {
+    const cartid = req.body.cartid;
+    const totalquantity = req.body.total;
+    db.query(
+    "UPDATE cart SET payment_status = ?, total = ? WHERE cartid = ?",
+    ["no", totalquantity, cartid], (err, result) => {
+        if(err){
+            console.error('Error updating data:', err);
+            res.status(500).send('Error updating data');
+        }
+        else{
+            console.log('Received cartid:', cartid);
+            console.log('Received totalquantity:', totalquantity);
+            console.log('Data updated successfully');
+            res.status(200).send({message: "ORDER CONFIRM SUCCESSFULLY!"});
+        }
+    })
+});
 
+const userstorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'public/customer-upload')
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + '-' + file.originalname);
+    },
+});
+
+const userupload = multer({ storage: userstorage });
+
+app.post('/userupload', userupload.single('file'), (req, res) => {
+    // console.log(userupload)
+    res.json({ message: 'File uploaded successfully' });
+});
 
 //admin
 
+const path = require('path');
 
 app.get('/productlists', (req, res) => {
     const type = req.body.type;
@@ -494,7 +530,6 @@ app.get('/monthlysale', (req,res) => {
   
   const upload = multer({ storage: storage });
   const fileUpload = upload.fields([{ name: "image-file", maxCount: 1}]);
-  
   
   
   app.post('/upload',upload.single('file'), (req, res) => {
