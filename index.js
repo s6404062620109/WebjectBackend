@@ -468,8 +468,20 @@ const userstorage = multer.diskStorage({
 const userupload = multer({ storage: userstorage });
 
 app.post('/userupload', userupload.single('file'), (req, res) => {
-    // console.log(userupload)
-    res.json({ message: 'File uploaded successfully' });
+    const filename = req.file.filename;
+    const cartid = req.body.cartid;
+    // console.log(cartid);
+    // console.log(filename);
+    db.query(
+    "UPDATE cart SET qr_picture = ?, upload_date = NOW() WHERE cartid = ?",
+    ['/'+filename, cartid], (err, result) => {
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.json({ message: 'File uploaded successfully' });
+        }
+    });
 });
 
 //admin
