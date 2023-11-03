@@ -557,17 +557,34 @@ app.get('/monthlysale', (req,res) => {
     console.log('Color:', color);
     console.log('Category:', category);
     console.log('Uploaded File Details:', uploadedFile);
-  
-  
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+        return res.status(400).json({ message: 'No file uploaded' });
     }
-  
     const filePath = req.file.path;
     const originalFileName = req.file.originalname;
   
-    // Respond with the file path and original filename
-    res.json({ path: filePath, filename: originalFileName });
+    const data = {
+        name: name,
+        description: description,
+        price: price,
+        quantity: quantity,
+        picture: originalFileName,
+        category: category,
+        size: size,
+        color: color,
+        picture: category+"/"+uploadedFile["filename"]
+    };
+  
+    const sql = 'INSERT INTO product SET ?';
+  
+    db.query(sql, data, (err, results) => {
+        if (err) {
+          console.error('Error inserting data: ' + err);
+        } else {
+          console.log('Data inserted successfully.');
+          res.json({ path: filePath, filename: originalFileName });
+        }
+    });
   });
   
   app.get('/orderlists', (req, res) => {
@@ -597,6 +614,23 @@ app.get('/monthlysale', (req,res) => {
     });
     
   })
+
+  app.delete('/productdel', (req, res) => {
+    const { productid } = req.body;
+    console.log(productid)
+  
+    const sql = 'DELETE FROM product WHERE productid = ?';
+  
+    db.query(sql, [ productid ], (err, result) => {
+      if (err) {
+        console.error('Error deleting product:', err);
+        res.status(500).json({ error: 'Error deleting product' });
+      } else {
+        console.log('Product deleted successfully');
+        res.status(200).json({ message: 'Product deleted successfully' });
+      }
+    });
+  });
 
 app.listen('3001', () =>{
     console.log('Server is running on port 3001');
