@@ -569,6 +569,34 @@ app.get('/monthlysale', (req,res) => {
     // Respond with the file path and original filename
     res.json({ path: filePath, filename: originalFileName });
   });
+  
+  app.get('/orderlists', (req, res) => {
+    const type = req.body.type;
+    db.query("SELECT * FROM cart",
+    [type], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.status(200).json(result);
+        }
+    });
+  });
+  
+  app.put('/statuschange', (req,res) => {
+    const { status,cartid } = req.body
+    console.log(status,cartid)
+    const sql = 'UPDATE cart SET payment_status = ? WHERE cartid = ?';
+    db.query(sql,[status,cartid], (err, result) =>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.status(200).json(result);
+        }
+    });
+    
+  })
 
 app.listen('3001', () =>{
     console.log('Server is running on port 3001');
