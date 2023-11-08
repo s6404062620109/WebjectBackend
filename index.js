@@ -11,7 +11,7 @@ const app = express();
 
 app.use(cors({
     origin: ["http://localhost:3000"],
-    methods: ["GET", "POST","PUT"],
+    methods: ["GET", "POST","PUT","DELETE"],
     credentials: true
 }));
 app.use(express.json());
@@ -615,6 +615,24 @@ app.get('/productlists', (req, res) => {
         }
     });
   })
+  app.put('/editproduct', (req, res) => {
+    const data = req.body;
+    // Extract the productid from data or use it as needed in the query
+    const productid = data.productid;
+
+    const sql = 'UPDATE product SET name = ?, description = ?, color = ?, size = ?, price = ?, quantity = ?, category = ? WHERE productid = ?';
+    // Use an array to provide values in the same order as the placeholders in the SQL query
+    const values = [data.name, data.description, data.color, data.size, data.price, data.quantity, data.category, productid];
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
 
   app.delete('/productdel', (req, res) => {
     const { productid } = req.body;
